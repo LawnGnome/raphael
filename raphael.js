@@ -920,6 +920,7 @@ Raphael = (function () {
                 if (dot.color.error) {
                     return null;
                 }
+                dot.opacity = R.is(dot.color.o, "undefined") ? 1.0 : dot.color.o;
                 dot.color = dot.color.hex;
                 par[2] && (dot.offset = par[2] + "%");
                 dots[push](dot);
@@ -1121,6 +1122,7 @@ Raphael = (function () {
                 var stop = $("stop");
                 $(stop, {
                     offset: dots[i].offset ? dots[i].offset : !i ? "0%" : "100%",
+                    "stop-opacity": dots[i].opacity,
                     "stop-color": dots[i].color || "#fff"
                 });
                 el[appendChild](stop);
@@ -2057,6 +2059,12 @@ Raphael = (function () {
             if (dots[length]) {
                 fill.on = true;
                 fill.method = "none";
+                // We can't do proper per-stop opacity in VML, but the simple
+                // case of two stops with one stop being opaque and the other
+                // being semi- or fully-transparent is doable.
+                if (dots[length] == 2 && dots[0].opacity == 1 && dots[1].opacity < 1.0) {
+                    fill.opacity = (dots[1].opacity * 100).toString() + "%";
+                }
                 fill.color = dots[0].color;
                 fill.color2 = dots[dots[length] - 1].color;
                 var clrs = [];
